@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  snipesend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    # Add any environment variables your app needs
+    # - DATABASE_URL=your_database_url
+    # - GMAIL_CLIENT_ID=your_gmail_client_id
+    # - GMAIL_CLIENT_SECRET=your_gmail_client_secret
+    # - JWT_SECRET=your_jwt_secret
+    # - NEXTAUTH_SECRET=your_nextauth_secret
+    # - NEXTAUTH_URL=http://your_domain.com
+    networks:
+      - snipesend-network
+
+networks:
+  snipesend-network:
+    driver: bridge

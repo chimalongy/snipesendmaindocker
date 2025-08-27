@@ -2,9 +2,12 @@ version: '3.8'
 
 services:
   snipesend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # Option 1: Pull from Docker Hub (recommended for production)
+    image: yourusername/snipesend:latest
+    # Option 2: Build locally (uncomment if you want to build on EC2)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:

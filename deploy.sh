@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # SniperSend Docker Deployment Script for Amazon EC2
-# Make sure to run this script from your project directory
+# This script pulls the latest image from Docker Hub and runs it
 
-echo "🚀 Starting SniperSend deployment..."
+echo "🚀 Starting SniperSend deployment from Docker Hub..."
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
@@ -19,9 +19,18 @@ docker-compose down
 echo "🧹 Cleaning up old images..."
 docker image prune -f
 
-# Build and start the application
-echo "🔨 Building and starting SniperSend..."
-docker-compose up --build -d
+# Pull the latest image from Docker Hub
+echo "📥 Pulling latest image from Docker Hub..."
+docker-compose pull
+
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to pull image from Docker Hub!"
+    exit 1
+fi
+
+# Start the application
+echo "🚀 Starting SniperSend..."
+docker-compose up -d
 
 # Wait for the application to start
 echo "⏳ Waiting for application to start..."
@@ -41,3 +50,4 @@ echo "  View logs: docker-compose logs -f"
 echo "  Stop app: docker-compose down"
 echo "  Restart app: docker-compose restart"
 echo "  Update app: ./deploy.sh"
+echo "  Pull latest image: docker-compose pull"

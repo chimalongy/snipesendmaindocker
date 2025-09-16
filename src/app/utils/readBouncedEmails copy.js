@@ -1,5 +1,4 @@
 import { ImapFlow } from "imapflow";
-import { simpleParser } from "mailparser";
 
 // Helper: fetch full raw source of a message
 async function getMessageBody(client, uid) {
@@ -28,12 +27,15 @@ export async function readBouncedEmails(emailAddress, list, app_password) {
     logger: false, // silence logs
   });
 
-  const filteredEmails = [];
+  let filteredEmails = [];
 
   try {
     await client.connect();
+
+    // Open inbox (readonly so we don’t mark messages as seen)
     await client.mailboxOpen("INBOX", { readOnly: true });
 
+    // Search for bounce messages by common subjects/senders
     const searchCriteria = [
       ["FROM", "mailer-daemon"],
       ["FROM", "postmaster"],
@@ -41,23 +43,24 @@ export async function readBouncedEmails(emailAddress, list, app_password) {
     ];
 
     for (const criteria of searchCriteria) {
-      const messages = await client.search(criteria, { uid: true });
+      let messages = await client.search(criteria, { uid: true });
 
       for (const uid of messages) {
-        // Get the raw body
-        const raw = await getMessageBody(client, uid);
+        // Fetch envelope for metadata
+        const msg = await client.fetchOne(uid, {
+          envelope: true,
+        });
 
-        // Parse it using mailparser
-        const parsed = await simpleParser(raw);
+        const envelope = msg.envelope || {};
+        const subject = envelope.subject || "";
+        const from = envelope.from?.map((f) => f.address).join(", ") || "";
+        const date = envelope.date || "";
 
-        const from = parsed.from?.text || "";
-        const subject = parsed.subject || "";
-        const date = parsed.date || "";
-        const text = parsed.text || "";
-        const html = parsed.html || "";
+        // Fetch raw body
+        const body = await getMessageBody(client, uid);
 
-        // Find which of our target emails is mentioned inside the bounce body
-        const foundEmail = findEmailsInText(list, text + html);
+        // Check if any of our target addresses are inside the bounce notice
+        const foundEmail = findEmailsInText(list, body);
 
         if (foundEmail) {
           filteredEmails.push({
@@ -66,11 +69,8 @@ export async function readBouncedEmails(emailAddress, list, app_password) {
             subject,
             to: emailAddress,
             date,
-            plainText: text,
-            htmlText: html,
-            fullBody: text + "\n\n" + html,
-            receiver: foundEmail,
-            attachments: parsed.attachments || [],
+            body,
+            receiver: foundEmail, // the email that bounced
           });
         }
       }

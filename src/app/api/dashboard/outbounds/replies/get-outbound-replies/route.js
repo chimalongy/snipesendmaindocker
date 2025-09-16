@@ -19,7 +19,7 @@ export async function POST(req) {
       );
     }
 
-    await TableCreator();
+    // await TableCreator();
 
     const outbound = await db.findOutbound(outbound_id);
     if (!outbound.success) {
@@ -45,33 +45,27 @@ export async function POST(req) {
         continue;
       }
 
-      const { access_token, refresh_token } = emailSettings.data;
+      const { password } = emailSettings.data;
+      console.log(password);
 
       console.log(`
         EMAIL address: ${emailAssigned},
-        Access token: ${access_token},
-        Refresh token: ${refresh_token}
+        password: ${password},
+      
       `);
 
       // fetch replies for this allocation
-      const replies = await readEmails(
-        emailAssigned,
-        list,
-        refresh_token,
-        access_token,
-        subject
-      );
+      const replies = await readEmails(emailAssigned, list, password, subject);
 
       const bouncedreplies = await readBouncedEmails(
         emailAssigned,
         list,
-        refresh_token,
-        access_token,
+        password,
         subject
-      )
+      );
 
       results.push(replies);
-      results.push(bouncedreplies);
+      // results.push(bouncedreplies);
     }
 
     // flatten replies into single array

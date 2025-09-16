@@ -114,6 +114,7 @@ export async function POST(req) {
     );
 
     const url = `${process.env.TASKS_SCHEDULER_WORKER}/schedule`;
+    console.log(url)
 
     for (let i = 0; i < allocations.length; i++) {
       const emailAssigned = allocations[i].emailAssigned;
@@ -128,8 +129,8 @@ export async function POST(req) {
           emailAssigned
         );
       }
-      console.log("THREADS HERE:");
-      console.log(threads);
+      // console.log("THREADS HERE:");
+      // console.log(threads);
 
       const emailSettings = await db.findEmailByemailAddress(emailAssigned);
       if (!emailSettings.success) {
@@ -137,7 +138,9 @@ export async function POST(req) {
         continue;
       }
 
-      const { access_token,refresh_token, sender_name, signature } = emailSettings.data;
+      const { password, sender_name, signature } = emailSettings.data;
+
+      
 
       
 
@@ -157,15 +160,17 @@ export async function POST(req) {
         signature,
         threads,
         sender_email:emailAssigned,
-        access_token,
-        refresh_token,
+        password:password
        
       };
 
-      //console.log (payload)
+      
+
+
 
       try {
         const result = await axios.post(url, payload);
+        console.log(result.data)
         if (!result.data.success) {
           throw new Error(result.data.message || "Task scheduling failed.");
         }

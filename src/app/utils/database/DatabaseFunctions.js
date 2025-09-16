@@ -155,7 +155,7 @@ async saveGmailConnection(
   sending_capacity) {
   try {
     const insertQuery = `
-      INSERT INTO email_settings_2 
+      INSERT INTO email_settings
       (user_id, email_address, access_token, refresh_token, sender_name, signature, daily_sending_capacity)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id, user_id, email_address, sender_name, signature, daily_sending_capacity, daily_usage, last_used, created_at
@@ -192,7 +192,7 @@ async saveGmailConnection(
 async deleteEmail(id) {
   try {
     const deleteQuery = `
-      DELETE FROM email_settings_2 WHERE id = $1
+      DELETE FROM email_settings WHERE id = $1
       RETURNING id
     `;
     const result = await pool.query(deleteQuery, [id]);
@@ -220,7 +220,7 @@ async updateEmail(id, updateFields) {
     values.push(id);
 
     const updateQuery = `
-      UPDATE email_settings_2 SET ${setClause}
+      UPDATE email_settings SET ${setClause}
       WHERE id = $${values.length}
       RETURNING id, user_id, email_address, sender_name, signature, daily_sending_capacity, created_at
     `;
@@ -244,7 +244,7 @@ async getUserEmails(userId) {
   try {
     const query = `
       SELECT *
-      FROM email_settings_2
+      FROM email_settings
       WHERE user_id = $1
       ORDER BY created_at DESC
     `;
@@ -277,7 +277,7 @@ async findEmailById(id) {
   try {
     const query = `
       SELECT id, user_id, email_address, sender_name, signature, daily_sending_capacity, created_at
-      FROM email_settings_2
+      FROM email_settings
       WHERE id = $1
     `;
     const result = await pool.query(query, [id]);
@@ -296,7 +296,7 @@ async findEmailByemailAddress(email) {
   try {
     const query = `
       SELECT *
-      FROM email_settings_2
+      FROM email_settings
       WHERE email_address = $1
     `;
     const result = await pool.query(query, [email]);

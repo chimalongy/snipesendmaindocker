@@ -20,8 +20,10 @@ import useSelectedOutboundStore from "@/app/utils/store/selectedoutbound";
 import toast from "react-hot-toast";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useRouter } from "next/navigation";
 
 export default function OutboundManagement() {
+ let  router = useRouter();
   const user = useUserStore((state) => state.user);
   const setSelectedOutbound = useSelectedOutboundStore((state) => state.setSelectedOutbound);
   const [campaigns, setCampaigns] = useState([]);
@@ -417,14 +419,18 @@ export default function OutboundManagement() {
                         {campaign.created_at}
                       </td>
                       <td className="px-4 py-4 sm:px-6 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <Link
-                          href={`/dashboard/outbounds/${campaign.outbound_name}`}
+                        <p
+                          
                           className="text-indigo-600 hover:text-indigo-900 inline-flex items-center"
                           title="View"
-                          onClick={() => setSelectedOutbound(campaign)}
+                          onClick={() => {
+                            setSelectedOutbound(campaign)
+                            router.push(`/dashboard/outbounds/${campaign.outbound_name}`)
+                            
+                          }}
                         >
                           <RiEyeLine className="w-4 h-4" />
-                        </Link>
+                        </p>
                         <Link
                           href={`/dashboard/outbounds/${campaign.outbound_name}/newtask`}
                           className="text-blue-600 hover:text-blue-900 inline-flex items-center"
